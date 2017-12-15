@@ -11,7 +11,7 @@ type Cluster struct {
 	Personality string
 	Crds        *cmap.ConcurrentMap
 	Nodes       *cmap.ConcurrentMap
-	Namespace   *[]Namespace
+	Namespace   *cmap.ConcurrentMap
 	Events      *[]Events
 }
 
@@ -126,6 +126,24 @@ func (m *RootRouter) UpdateNode(clusterName, nodeName string, node Node) error {
 		} else {
 			return errors.New("node by that name does not exist")
 		}
+	} else {
+		return errors.New("unable to fetch cluster from map for some reason")
+	}
+	return nil
+}
+
+func (m *RootRouter) AddNamespace(clusterName string, namespace Namespace) error {
+	if !m.Clusters.Has(clusterName) {
+		return errors.New("cluster does not exist")
+	}
+
+	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
+		existingCluster := tmpCluster.(Cluster)
+		if existingCluster.Namespace.Has(namespace.Name) {
+			return errors.New("namespace by that name already exists")
+		}
+		existingCluster.Namespace.Set(namespace.Name, namespace)
+		m.Clusters.Set(existingCluster.Name, existingCluster)
 	} else {
 		return errors.New("unable to fetch cluster from map for some reason")
 	}

@@ -24,7 +24,6 @@ func main() {
 	// Concurrent HashMap
 	bar := cmap.New()
 	clusters := &models.RootRouter{Clusters: &bar}
-	//clusters := &models.RootRouter{}
 
 	s := mux.NewRouter()
 	s.HandleFunc("/clusters", clusters.AddClusterHandler).Methods("POST")
@@ -33,7 +32,7 @@ func main() {
 	s.HandleFunc("/clusters/{name}/crds/{crd}", clusters.UpdateCustomResourceHandler).Methods("PUT")
 	s.HandleFunc("/clusters/{name}/nodes", clusters.AddNodeHandler).Methods("POST")
 	s.HandleFunc("/clusters/{name}/nodes/{node}", clusters.UpdateNodeHandler).Methods("PUT")
-	//s.HandleFunc("/clusters/{name}/namespaces", clusters.SecureHandler).Methods("POST")
+	s.HandleFunc("/clusters/{name}/namespaces", clusters.AddNamespaceHandler).Methods("POST")
 	//s.HandleFunc("/clusters/{name}/namespaces/{namespace}", clusters.SecureHandler).Methods("PUT")
 	//s.HandleFunc("/clusters/{name}/events", clusters.SecureHandler).Methods("POST")
 	//s.HandleFunc("/clusters/{name}/events/{event}", clusters.SecureHandler).Methods("PUT")
