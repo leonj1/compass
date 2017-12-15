@@ -12,7 +12,7 @@ type Cluster struct {
 	Crds        *cmap.ConcurrentMap
 	Nodes       *cmap.ConcurrentMap
 	Namespace   *cmap.ConcurrentMap
-	Events      *[]Events
+	Events      string
 }
 
 func (m *RootRouter) AddCluster(cluster Cluster) error {
@@ -158,6 +158,21 @@ func (m *RootRouter) UpdateNamespace(clusterName, namespaceName string, namespac
 		} else {
 			return errors.New("node by that name does not exist")
 		}
+	} else {
+		return errors.New("unable to fetch cluster from map for some reason")
+	}
+	return nil
+}
+
+func (m *RootRouter) SetEvents(clusterName, events string) error {
+	if !m.Clusters.Has(clusterName) {
+		return errors.New("cluster does not exist")
+	}
+
+	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
+		existingCluster := tmpCluster.(Cluster)
+		existingCluster.Events = events
+		m.Clusters.Set(existingCluster.Name, existingCluster)
 	} else {
 		return errors.New("unable to fetch cluster from map for some reason")
 	}

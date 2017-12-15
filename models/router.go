@@ -112,11 +112,6 @@ func (m *RootRouter) AddNodeHandler(w http.ResponseWriter, r *http.Request) {
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Node{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -164,11 +159,6 @@ func (m *RootRouter) AddNamespaceHandler(w http.ResponseWriter, r *http.Request)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Namespace{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -209,6 +199,21 @@ func (m *RootRouter) UpdateNamespaceHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	respondWithJSON(w, 200, &QueryResponse{Message: "updated"})
+}
+
+func (m *RootRouter) SetEventsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	body, err := ioutil.ReadAll(r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	err = m.SetEvents(clusterName, string(body))
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding events: %s", err.Error())}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	respondWithJSON(w, 201, &QueryResponse{Message: "set"})
 }
 
 type PostResponse struct {
