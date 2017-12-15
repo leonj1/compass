@@ -19,11 +19,6 @@ type RootRouter struct {
 func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Cluster{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -47,11 +42,6 @@ func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Cluster{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -75,11 +65,6 @@ func (m *RootRouter) AddCustomResourceHandler(w http.ResponseWriter, r *http.Req
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Crd{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -104,11 +89,6 @@ func (m *RootRouter) UpdateCustomResourceHandler(w http.ResponseWriter, r *http.
 	crdName := vars["crd"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Crd{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -161,11 +141,6 @@ func (m *RootRouter) UpdateNodeHandler(w http.ResponseWriter, r *http.Request) {
 	nodeName := vars["node"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
-		response := &ErrorResponse{ErrorMessage: "Message not found"}
-		respondWithJSON(w, 404, response)
-		return
-	}
 	payload := &Node{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -181,7 +156,7 @@ func (m *RootRouter) UpdateNodeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
+	respondWithJSON(w, 200, &QueryResponse{Message: "updated"})
 }
 
 func (m *RootRouter) AddNamespaceHandler(w http.ResponseWriter, r *http.Request) {
@@ -210,6 +185,30 @@ func (m *RootRouter) AddNamespaceHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
+}
+
+func (m *RootRouter) UpdateNamespaceHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	namespace := vars["namespace"]
+	body, err := ioutil.ReadAll(r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	payload := &Namespace{}
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling namespace"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	err = m.UpdateNamespace(clusterName, namespace, *payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem updating namespace: %s", err.Error())}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	respondWithJSON(w, 200, &QueryResponse{Message: "updated"})
 }
 
 type PostResponse struct {

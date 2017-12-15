@@ -33,7 +33,7 @@ func main() {
 	s.HandleFunc("/clusters/{name}/nodes", clusters.AddNodeHandler).Methods("POST")
 	s.HandleFunc("/clusters/{name}/nodes/{node}", clusters.UpdateNodeHandler).Methods("PUT")
 	s.HandleFunc("/clusters/{name}/namespaces", clusters.AddNamespaceHandler).Methods("POST")
-	//s.HandleFunc("/clusters/{name}/namespaces/{namespace}", clusters.SecureHandler).Methods("PUT")
+	s.HandleFunc("/clusters/{name}/namespaces/{namespace}", clusters.UpdateNamespaceHandler).Methods("PUT")
 	//s.HandleFunc("/clusters/{name}/events", clusters.SecureHandler).Methods("POST")
 	//s.HandleFunc("/clusters/{name}/events/{event}", clusters.SecureHandler).Methods("PUT")
 
