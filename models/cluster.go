@@ -28,13 +28,13 @@ func (m *RootRouter) UpdateCluster(clusterName string, cluster Cluster) error {
 		return errors.New("cluster does not exist")
 	}
 
-	if existing, ok := m.Clusters.Get(clusterName); ok {
-		current := existing.(Cluster)
-		hasNameChanged := current.Name != cluster.Name
-		current.Name = cluster.Name
-		current.Status = cluster.Status
-		current.Personality = cluster.Personality
-		m.Clusters.Set(cluster.Name, current)
+	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
+		existingCluster := tmpCluster.(Cluster)
+		hasNameChanged := existingCluster.Name != cluster.Name
+		existingCluster.Name = cluster.Name
+		existingCluster.Status = cluster.Status
+		existingCluster.Personality = cluster.Personality
+		m.Clusters.Set(cluster.Name, existingCluster)
 		if hasNameChanged {
 			m.Clusters.Remove(clusterName)
 		}
@@ -49,13 +49,13 @@ func (m *RootRouter) AddCustomResource(clusterName string, crd Crd) error {
 		return errors.New("cluster does not exist")
 	}
 
-	if existing, ok := m.Clusters.Get(clusterName); ok {
-		current := existing.(Cluster)
-		if current.Crds.Has(crd.Name) {
+	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
+		existingCluster := tmpCluster.(Cluster)
+		if existingCluster.Crds.Has(crd.Name) {
 			return errors.New("crd already exists in cluster")
 		}
-		current.Crds.Set(crd.Name, crd)
-		m.Clusters.Set(clusterName, current)
+		existingCluster.Crds.Set(crd.Name, crd)
+		m.Clusters.Set(clusterName, existingCluster)
 	} else {
 		return errors.New("unable to fetch cluster from map for some reason")
 	}
@@ -67,20 +67,18 @@ func (m *RootRouter) UpdateCustomResource(clusterName, crdName string, crd Crd) 
 		return errors.New("cluster does not exist")
 	}
 
-	if existing, ok := m.Clusters.Get(clusterName); ok {
-		current := existing.(Cluster)
-		if !current.Crds.Has(crd.Name) {
-			return errors.New("crd does not exist in cluster")
-		}
-		if existingCrd, ok := current.Crds.Get(crdName); ok {
-			currentCrd := existingCrd.(Crd)
-			hasNameChanged := currentCrd.Name != crd.Name
-			currentCrd.Name = crd.Name
-			currentCrd.Version = crd.Version
-			current.Crds.Set(crd.Name, currentCrd)
+	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
+		existingCluster := tmpCluster.(Cluster)
+		if tmpCrd, ok := existingCluster.Crds.Get(crdName); ok {
+			existingCrd := tmpCrd.(Crd)
+			hasNameChanged := existingCrd.Name != crd.Name
+			existingCrd.Name = crd.Name
+			existingCrd.Version = crd.Version
+			existingCluster.Crds.Set(crd.Name, existingCrd)
 			if hasNameChanged {
-				current.Crds.Remove(crdName)
+				existingCluster.Crds.Remove(crdName)
 			}
+			m.Clusters.Set(clusterName, existingCluster)
 		} else {
 			return errors.New("unable to fetch crd from cluster some reason")
 		}
@@ -114,16 +112,20 @@ func (m *RootRouter) UpdateNode(clusterName, nodeName string, node Node) error {
 	}
 
 	if existing, ok := m.Clusters.Get(clusterName); ok {
-		current := existing.(Cluster)
-		if existingNode, ok := m.Clusters.Get(clusterName); ok {
+		cluster := existing.(Cluster)
+		if tmpNode, ok := m.Clusters.Get(clusterName); ok {
+			existingNode := tmpNode.(Node)
+			hasNameChanged := existingNode.Name != node.Name
+			existingNode.Name = node.Name
+			existingNode.Version = node.Version
+			cluster.Nodes.Set(existingNode.Name, existingNode)
+			if hasNameChanged {
+				cluster.Nodes.Remove(nodeName)
+			}
+			m.Clusters.Set(clusterName, cluster)
 		} else {
 			return errors.New("node by that name does not exist")
 		}
-		//if current.Nodes.Has(node.Name) {
-		//	return errors.New("node by that name already exists")
-		//}
-		//current.Nodes.Set(node.Name, node)
-		//m.Clusters.Set(current.Name, current)
 	} else {
 		return errors.New("unable to fetch cluster from map for some reason")
 	}
