@@ -127,19 +127,32 @@ func (m *RootRouter) UpdateCustomResourceHandler(w http.ResponseWriter, r *http.
 	respondWithJSON(w, 200, &QueryResponse{Message: "updated"})
 }
 
-func (m *RootRouter) SecureHandler(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//hash := vars["hash"]
+func (m *RootRouter) AddNodeHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
-	//if value, ok := m.cMap.Get(hash); ok {
-	//	valueAsString := value.(string)
-	//	response := &QueryResponse{Message: string(valueAsString)}
-	//	f, _ := json.Marshal(response)
-	//	w.Write([]byte(f))
-	//	return
-	//}
-	response := &ErrorResponse{ErrorMessage: "Message not found"}
-	respondWithJSON(w, 404, response)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Message not found"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+	payload := &Node{}
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling node"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	err = m.AddNode(clusterName, *payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding node: %s", err.Error())}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
 }
 
 type PostResponse struct {

@@ -10,7 +10,7 @@ type Cluster struct {
 	Status      string
 	Personality string
 	Crds        *cmap.ConcurrentMap
-	Nodes       *[]Node
+	Nodes       *cmap.ConcurrentMap
 	Namespace   *[]Namespace
 	Events      *[]Events
 }
@@ -84,6 +84,24 @@ func (m *RootRouter) UpdateCustomResource(clusterName, crdName string, crd Crd) 
 		} else {
 			return errors.New("unable to fetch crd from cluster some reason")
 		}
+	} else {
+		return errors.New("unable to fetch cluster from map for some reason")
+	}
+	return nil
+}
+
+func (m *RootRouter) AddNode(clusterName string, node Node) error {
+	if !m.Clusters.Has(clusterName) {
+		return errors.New("cluster does not exist")
+	}
+
+	if existing, ok := m.Clusters.Get(clusterName); ok {
+		current := existing.(Cluster)
+		if current.Nodes.Has(node.Name) {
+			return errors.New("node by that name already exists")
+		}
+		current.Nodes.Set(node.Name, node)
+		m.Clusters.Set(current.Name, current)
 	} else {
 		return errors.New("unable to fetch cluster from map for some reason")
 	}

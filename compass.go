@@ -31,15 +31,15 @@ func main() {
 	s.HandleFunc("/clusters/{name}", clusters.UpdateClusterHandler).Methods("PUT")
 	s.HandleFunc("/clusters/{name}/crds", clusters.AddCustomResourceHandler).Methods("POST")
 	s.HandleFunc("/clusters/{name}/crds/{crd}", clusters.UpdateCustomResourceHandler).Methods("PUT")
-	//s.HandleFunc("/clusters/{name}/nodes", clusters.SecureHandler).Methods("POST")
+	s.HandleFunc("/clusters/{name}/nodes", clusters.AddNodeHandler).Methods("POST")
 	//s.HandleFunc("/clusters/{name}/nodes/{node}", clusters.SecureHandler).Methods("PUT")
 	//s.HandleFunc("/clusters/{name}/namespaces", clusters.SecureHandler).Methods("POST")
 	//s.HandleFunc("/clusters/{name}/namespaces/{namespace}", clusters.SecureHandler).Methods("PUT")
 	//s.HandleFunc("/clusters/{name}/events", clusters.SecureHandler).Methods("POST")
 	//s.HandleFunc("/clusters/{name}/events/{event}", clusters.SecureHandler).Methods("PUT")
 
-	s.HandleFunc("/clusters", clusters.SecureHandler).Methods("GET")
-	s.HandleFunc("/clusters/{name}", clusters.SecureHandler).Methods("GET")
+	//s.HandleFunc("/clusters", clusters.SecureHandler).Methods("GET")
+	//s.HandleFunc("/clusters/{name}", clusters.SecureHandler).Methods("GET")
 
 	log.Printf("Staring HTTPS service on %s .../n", *httpPort)
 	if err := http.ListenAndServe(*httpPort, s); err != nil {
