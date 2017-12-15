@@ -18,7 +18,6 @@ type RootRouter struct {
 
 func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Cluster{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -41,7 +40,6 @@ func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Cluster{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -64,7 +62,6 @@ func (m *RootRouter) AddCustomResourceHandler(w http.ResponseWriter, r *http.Req
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Crd{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -88,7 +85,6 @@ func (m *RootRouter) UpdateCustomResourceHandler(w http.ResponseWriter, r *http.
 	clusterName := vars["name"]
 	crdName := vars["crd"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Crd{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -111,7 +107,6 @@ func (m *RootRouter) AddNodeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Node{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -135,7 +130,6 @@ func (m *RootRouter) UpdateNodeHandler(w http.ResponseWriter, r *http.Request) {
 	clusterName := vars["name"]
 	nodeName := vars["node"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Node{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -158,7 +152,6 @@ func (m *RootRouter) AddNamespaceHandler(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Namespace{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -182,7 +175,6 @@ func (m *RootRouter) UpdateNamespaceHandler(w http.ResponseWriter, r *http.Reque
 	clusterName := vars["name"]
 	namespace := vars["namespace"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	payload := &Namespace{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
@@ -205,7 +197,6 @@ func (m *RootRouter) SetEventsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
-	w.Header().Set("Content-Type", "application/json")
 	err = m.SetEvents(clusterName, string(body))
 	if err != nil {
 		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding events: %s", err.Error())}
@@ -214,6 +205,10 @@ func (m *RootRouter) SetEventsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, 201, &QueryResponse{Message: "set"})
+}
+
+func (m *RootRouter) GetAllClustersHandler(w http.ResponseWriter, r *http.Request) {
+	respondWithJSON(w, 200, m.Clusters)
 }
 
 type PostResponse struct {

@@ -36,7 +36,7 @@ func main() {
 	s.HandleFunc("/clusters/{name}/namespaces/{namespace}", clusters.UpdateNamespaceHandler).Methods("PUT")
 	s.HandleFunc("/clusters/{name}/events", clusters.SetEventsHandler).Methods("POST")
 
-	//s.HandleFunc("/clusters", clusters.SecureHandler).Methods("GET")
+	s.HandleFunc("/clusters", clusters.GetAllClustersHandler).Methods("GET")
 	//s.HandleFunc("/clusters/{name}", clusters.SecureHandler).Methods("GET")
 
 	log.Printf("Staring HTTPS service on %s .../n", *httpPort)
