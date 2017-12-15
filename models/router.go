@@ -25,16 +25,35 @@ func (m *RootRouter) AddCluster(cluster Cluster) error {
 	return nil
 }
 
-func (m *RootRouter) UpdateCluster(cluster Cluster) error {
+func (m *RootRouter) UpdateCluster(clusterName string, cluster Cluster) error {
 	if !m.Clusters.Has(cluster.Name) {
 		return errors.New("cluster does not exist")
 	}
 
-	if existing, ok := m.Clusters.Get(cluster.Name); ok {
+	if existing, ok := m.Clusters.Get(clusterName); ok {
 		current := existing.(Cluster)
+		current.Name = cluster.Name
 		current.Status = cluster.Status
 		current.Personality = cluster.Personality
-		m.Clusters.Set(cluster.Name, existing)
+		m.Clusters.Set(cluster.Name, current)
+	} else {
+		return errors.New("unable to fetch cluster from map for some reason")
+	}
+	return nil
+}
+
+func (m *RootRouter) AddCustomResource(clusterName string, crd Crd) error {
+	if !m.Clusters.Has(clusterName) {
+		return errors.New("cluster does not exist")
+	}
+
+	if existing, ok := m.Clusters.Get(clusterName); ok {
+		current := existing.(Cluster)
+		if current.Crds.Has(crd.Name) {
+			return errors.New("crd already exists in cluster")
+		}
+		current.Crds.Set(crd.Name, crd)
+		m.Clusters.Set(clusterName, current)
 	} else {
 		return errors.New("unable to fetch cluster from map for some reason")
 	}
@@ -64,10 +83,12 @@ func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, 201, &QueryResponse{Message: "saved"})
+	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
 }
 
 func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
@@ -83,7 +104,7 @@ func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = m.UpdateCluster(*payload)
+	err = m.UpdateCluster(clusterName, *payload)
 	if err != nil {
 		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem updating cluster: %s", err.Error())}
 		respondWithJSON(w, 404, response)
@@ -91,6 +112,34 @@ func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	respondWithJSON(w, 200, &QueryResponse{Message: "updated"})
+}
+
+func (m *RootRouter) AddCustomResourceHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	body, err := ioutil.ReadAll(r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Message not found"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+	payload := &Crd{}
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling custom resource"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	err = m.AddCustomResource(clusterName, *payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding custom resource: %s", err.Error())}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
 }
 
 func (m *RootRouter) SecureHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,10 +1,12 @@
 package models
 
+import "github.com/orcaman/concurrent-map"
+
 type Cluster struct {
 	Name        string
 	Status      string
 	Personality string
-	Crds        *[]Crd
+	Crds        *cmap.ConcurrentMap
 	Nodes       *[]Node
 	Namespace   *[]Namespace
 	Events      *[]Events
