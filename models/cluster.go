@@ -107,3 +107,25 @@ func (m *RootRouter) AddNode(clusterName string, node Node) error {
 	}
 	return nil
 }
+
+func (m *RootRouter) UpdateNode(clusterName, nodeName string, node Node) error {
+	if !m.Clusters.Has(clusterName) {
+		return errors.New("cluster does not exist")
+	}
+
+	if existing, ok := m.Clusters.Get(clusterName); ok {
+		current := existing.(Cluster)
+		if existingNode, ok := m.Clusters.Get(clusterName); ok {
+		} else {
+			return errors.New("node by that name does not exist")
+		}
+		//if current.Nodes.Has(node.Name) {
+		//	return errors.New("node by that name already exists")
+		//}
+		//current.Nodes.Set(node.Name, node)
+		//m.Clusters.Set(current.Name, current)
+	} else {
+		return errors.New("unable to fetch cluster from map for some reason")
+	}
+	return nil
+}

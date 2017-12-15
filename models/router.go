@@ -155,6 +155,35 @@ func (m *RootRouter) AddNodeHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
 }
 
+func (m *RootRouter) UpdateNodeHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	nodeName := vars["node"]
+	body, err := ioutil.ReadAll(r.Body)
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Message not found"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+	payload := &Node{}
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling node"}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	err = m.UpdateNode(clusterName, nodeName, *payload)
+	if err != nil {
+		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem updating node: %s", err.Error())}
+		respondWithJSON(w, 404, response)
+		return
+	}
+
+	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
+}
+
 type PostResponse struct {
 	Digest string `json:"digest"`
 }
