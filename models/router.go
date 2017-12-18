@@ -211,6 +211,16 @@ func (m *RootRouter) GetAllClustersHandler(w http.ResponseWriter, r *http.Reques
 	respondWithJSON(w, 200, m.Clusters)
 }
 
+func (m *RootRouter) GetOneClustersHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	cluster, err := m.GetAClusterByName(clusterName)
+	if err != nil {
+		respondWithJSON(w, 404, "Problem finding cluster by name")
+	}
+	respondWithJSON(w, 200, cluster)
+}
+
 type PostResponse struct {
 	Digest string `json:"digest"`
 }
