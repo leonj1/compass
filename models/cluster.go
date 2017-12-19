@@ -3,20 +3,22 @@ package models
 import (
 	"github.com/kataras/go-errors"
 	"github.com/orcaman/concurrent-map"
+	"log"
 )
 
 type Cluster struct {
-	Name        string
-	Status      string
-	Personality string
-	Crds        *cmap.ConcurrentMap
-	Nodes       *cmap.ConcurrentMap
-	Namespace   *cmap.ConcurrentMap
-	Events      string
+	Name        string              `json:"name,omitempty"`
+	Status      string              `json:"status,omitempty"`
+	Personality string              `json:"personality,omitempty"`
+	Crds        *cmap.ConcurrentMap `json:"crds,omitempty"`
+	Nodes       *cmap.ConcurrentMap `json:"nodes,omitempty"`
+	Namespace   *cmap.ConcurrentMap `json:"namespace,omitempty"`
+	Events      string              `json:"events,omitempty"`
 }
 
 func (m *RootRouter) AddCluster(cluster Cluster) error {
 	if m.Clusters.Has(cluster.Name) {
+		log.Print("cluster already exists")
 		return errors.New("cluster already exists")
 	}
 	m.Clusters.Set(cluster.Name, cluster)

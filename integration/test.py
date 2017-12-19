@@ -5,7 +5,7 @@ import unittest
 import json
 import uuid
 
-host = "http://localhost:8743"
+host = "http://localhost:3244"
 
 
 def my_random_string(string_length=10):
@@ -27,93 +27,43 @@ class MyTest(unittest.TestCase):
         t = "2017-01-02 15:04:05"
         payload = {
            "name": "dev01",
-           "entity_type": "kubernetes cluster",
-           "last_update": {
-             "date": t,
-             "by": "someone",
-             "status": "pass"
-           },
-           "journal": {
-             t: {
-               "by": "someone",
-               "checks": [
-                 {
-                   "name": "checked mounts",
-                   "date": t,
-                   "status": "pass"
-                 }
-               ]
+           "status": "live",
+           "personality": "dev",
+           "events": "this is one line\nThis is another",
+           "crds": {
+             "pyjob": {
+               "name": "pyjob",
+               "version": "1.0"
+             },
+             "sparkjob": {
+               "name": "sparkjob",
+               "version": "2.0"
              }
+           },
+           "nodes": {
+             "node1": {
+               "name": "node1",
+               "version": "1.8.0"
+             },
+             "node2": {
+               "name": "node2",
+               "version": "1.8.0"
+             }
+           },
+           "namespace": {
+              "default": {
+                 "name": "default",
+                 "pod_count": 3,
+                 "crds": {
+                    "pyjob": 2,
+                    "sparkjob": 3
+                 }
+              }
            }
          }
 
-        r = requests.post("{}/confessions".format(host), json=payload)
+        r = requests.post("{}/clusters".format(host), json=payload)
         self.assertEqual(r.status_code, 201)
-
-    @unittest.skip("testing skipping")
-    def test_add_hardware_with_tags(self):
-        randomHost = my_random_string()
-        payload = {
-            "host": randomHost,
-            "tags": {
-               "environment": "dev"
-            }
-        }
-        r = requests.post("{}/hardware".format(host), json=payload)
-        self.assertEqual(r.status_code, 201)
-        r = requests.get("{}/tags/environment".format(host))
-        self.assertEqual(r.status_code, 200)
-        # TODO Find a way to ignore create_date
-        # self.assertEqual(r.content, "")
-        payload = {
-            "rack": "1"
-        }
-        r = requests.post("{}/tags/{}".format(host, randomHost), json=payload)
-        self.assertEqual(r.status_code, 201)
-        r = requests.get("{}/hardware/{}".format(host, randomHost))
-        self.assertEquals(r.status_code, 200)
-        r = requests.get("{}/tags/environment".format(host))
-        self.assertEquals(r.status_code, 200)
-        # print 'Content: {}'.format(r.content)
-
-    @unittest.skip("testing skipping")
-    def test_add_hardware_with_tags_and_services(self):
-        randomHost = my_random_string()
-        payload = {
-            "host": randomHost,
-            "services": [
-                {
-                    "name": "dockerhub",
-                    "short_name": "dockerhub",
-                    "repo": "",
-                    "version": "1.0",
-                    "docker": False
-                }
-            ],
-            "tags": {
-               "environment": "dev"
-            }
-        }
-        r = requests.post("{}/hardware".format(host), json=payload)
-        self.assertEqual(r.status_code, 201)
-        # TODO Find a way to ignore create_date
-        # self.assertEqual(r.content, "")
-        service = {
-            "name": "Apache Solr",
-            "short_name": "solr",
-            "repo": "",
-            "version": "5.3",
-            "docker": False
-        }
-        r = requests.post("{}/services/{}".format(host, randomHost), json=service)
-        self.assertEqual(r.status_code, 201)
-        # update the version for a service
-        service = {
-            "short_name": "solr",
-            "version": "6.0",
-        }
-        r = requests.put("{}/services/{}".format(host, randomHost), json=service)
-        self.assertEqual(r.status_code, 200)
 
 
 if __name__ == '__main__':

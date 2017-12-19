@@ -2,11 +2,12 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/orcaman/concurrent-map"
-	//"github.com/davecgh/go-spew/spew"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -18,9 +19,11 @@ type RootRouter struct {
 
 func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
+	log.Printf("Adding cluster payload: %s", body)
 	payload := &Cluster{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
+		log.Printf("Problem unmarshalling: %s", spew.Sdump(err))
 		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling cluster"}
 		respondWithJSON(w, 404, response)
 		return
@@ -28,6 +31,7 @@ func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = m.AddCluster(*payload)
 	if err != nil {
+		log.Printf("Problem adding cluster: %s", spew.Sdump(err))
 		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding cluster: %s", err.Error())}
 		respondWithJSON(w, 404, response)
 		return
