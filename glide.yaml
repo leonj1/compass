@@ -1,0 +1,6 @@
+package: github.com/leonj1/compass
+import:
+- package: github.com/gorilla/mux
+- package: github.com/kataras/go-errors
+- package: github.com/orcaman/concurrent-map
+- package: gopkg.in/natefinch/lumberjack.v2
