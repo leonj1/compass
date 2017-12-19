@@ -36,7 +36,7 @@ func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 		respondWithJSON(w, 404, response)
 		return
 	}
-
+	log.Info("Cluster added")
 	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
 }
 
@@ -218,16 +218,32 @@ func (m *RootRouter) GetAllClustersHandler(w http.ResponseWriter, r *http.Reques
 func (m *RootRouter) GetOneClustersHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
+	log.Infof("Getting cluster by name: %s", clusterName)
 	cluster, err := m.GetAClusterByName(clusterName)
 	if err != nil {
 		respondWithJSON(w, 404, "Problem finding cluster by name")
 	}
+	log.Info("Done getting cluster by name")
 	respondWithJSON(w, 200, cluster)
 }
 
 func (m *RootRouter) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, 200, "OK")
 }
+
+func (m *RootRouter) DeleteClustersHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	clusterName := vars["name"]
+	log.Infof("Deleting cluster by name: %s", clusterName)
+	err := m.DeleteAClusterByName(clusterName)
+	if err != nil {
+		respondWithJSON(w, 404, "Cluster does not exist")
+	}
+	log.Info("Done deleting cluster")
+	respondWithJSON(w, 200, "deleted")
+}
+
+///// **********************
 
 type PostResponse struct {
 	Digest string `json:"digest"`

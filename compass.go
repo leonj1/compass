@@ -44,6 +44,8 @@ func main() {
 	s.HandleFunc("/clusters", clusters.GetAllClustersHandler).Methods("GET")
 	s.HandleFunc("/clusters/{name}", clusters.GetOneClustersHandler).Methods("GET")
 
+	s.HandleFunc("/clusters/{name}", clusters.DeleteClustersHandler).Methods("DELETE")
+
 	s.HandleFunc("/public/health", clusters.HealthCheckHandler).Methods("GET")
 
 	port := fmt.Sprintf(":%s", *httpPort)

@@ -191,14 +191,23 @@ func (m *RootRouter) SetEvents(clusterName, events string) error {
 	return nil
 }
 
-func (m *RootRouter) GetAClusterByName(clusterName string) (*Cluster, error) {
+func (m *RootRouter) GetAClusterByName(clusterName string) (*ClusterContext, error) {
 	if !m.Clusters.Has(clusterName) {
 		return nil, errors.New("cluster does not exist")
 	}
 
 	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
-		existingCluster := tmpCluster.(Cluster)
+		existingCluster := tmpCluster.(ClusterContext)
 		return &existingCluster, nil
 	}
 	return nil, errors.New("cluster does not exist")
+}
+
+func (m *RootRouter) DeleteAClusterByName(clusterName string) error {
+	if !m.Clusters.Has(clusterName) {
+		return errors.New("cluster does not exist")
+	}
+
+	m.Clusters.Remove(clusterName)
+	return nil
 }
