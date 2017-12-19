@@ -3,6 +3,6 @@
 export HTTPPORT=${HTTPPORT:=80}
 
 cd /app
-/app/testify \
+/app/compass \
     -http-port=${HTTPPORT}
 

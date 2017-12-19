@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/leonj1/compass/models"
 	"github.com/orcaman/concurrent-map"
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	var httpPort = flag.String("http-port", ":80", "Port which HTTP rest endpoint should listen on")
+	var httpPort = flag.String("http-port", "80", "Port which HTTP rest endpoint should listen on")
 	flag.Parse()
 
 	log.SetOutput(&lumberjack.Logger{
@@ -39,8 +40,11 @@ func main() {
 	s.HandleFunc("/clusters", clusters.GetAllClustersHandler).Methods("GET")
 	s.HandleFunc("/clusters/{name}", clusters.GetOneClustersHandler).Methods("GET")
 
-	log.Printf("Staring HTTPS service on %s ...\n", *httpPort)
-	if err := http.ListenAndServe(*httpPort, s); err != nil {
+	s.HandleFunc("/public/health", clusters.HealthCheckHandler).Methods("GET")
+
+	port := fmt.Sprintf(":%s", *httpPort)
+	log.Printf("Staring HTTPS service on %s ...\n", port)
+	if err := http.ListenAndServe(port, s); err != nil {
 		panic(err)
 	}
 }

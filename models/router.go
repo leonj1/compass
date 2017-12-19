@@ -221,6 +221,10 @@ func (m *RootRouter) GetOneClustersHandler(w http.ResponseWriter, r *http.Reques
 	respondWithJSON(w, 200, cluster)
 }
 
+func (m *RootRouter) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	respondWithJSON(w, 200, "OK")
+}
+
 type PostResponse struct {
 	Digest string `json:"digest"`
 }
