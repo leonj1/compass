@@ -6,8 +6,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/orcaman/concurrent-map"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sync"
 )
@@ -19,11 +19,11 @@ type RootRouter struct {
 
 func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
-	log.Printf("Adding cluster payload: %s", body)
-	payload := &Cluster{}
+	log.Infof("Adding cluster payload: %s", body)
+	payload := &ClusterContext{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
-		log.Printf("Problem unmarshalling: %s", spew.Sdump(err))
+		log.Errorf("Problem unmarshalling: %s", spew.Sdump(err))
 		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling cluster"}
 		respondWithJSON(w, 404, response)
 		return
@@ -31,7 +31,7 @@ func (m *RootRouter) AddClusterHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = m.AddCluster(*payload)
 	if err != nil {
-		log.Printf("Problem adding cluster: %s", spew.Sdump(err))
+		log.Errorf("Problem adding cluster: %s", spew.Sdump(err))
 		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding cluster: %s", err.Error())}
 		respondWithJSON(w, 404, response)
 		return

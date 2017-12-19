@@ -6,21 +6,25 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/leonj1/compass/models"
 	"github.com/orcaman/concurrent-map"
-	"gopkg.in/natefinch/lumberjack.v2"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 )
+
+func init() {
+	log.SetFormatter(&log.TextFormatter{})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.DebugLevel)
+}
 
 func main() {
 	var httpPort = flag.String("http-port", "80", "Port which HTTP rest endpoint should listen on")
 	flag.Parse()
-
-	log.SetOutput(&lumberjack.Logger{
-		Filename:   "/tmp/compass.log",
-		MaxSize:    5, // megabytes
-		MaxBackups: 3,
-		MaxAge:     3, //days
-	})
 
 	// Concurrent HashMap
 	bar := cmap.New()
@@ -43,7 +47,7 @@ func main() {
 	s.HandleFunc("/public/health", clusters.HealthCheckHandler).Methods("GET")
 
 	port := fmt.Sprintf(":%s", *httpPort)
-	log.Printf("Staring HTTPS service on %s ...\n", port)
+	log.Infof("Staring HTTPS service on %s ...\n", port)
 	if err := http.ListenAndServe(port, s); err != nil {
 		panic(err)
 	}

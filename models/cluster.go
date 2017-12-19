@@ -16,7 +16,17 @@ type Cluster struct {
 	Events      string              `json:"events,omitempty"`
 }
 
-func (m *RootRouter) AddCluster(cluster Cluster) error {
+type ClusterContext struct {
+	Name        string                        `json:"name,omitempty"`
+	Status      string                        `json:"status,omitempty"`
+	Personality string                        `json:"personality,omitempty"`
+	Crds        map[string]NameVersionContext `json:"crds,omitempty"`
+	Nodes       map[string]NameVersionContext `json:"nodes,omitempty"`
+	Namespace   map[string]Namespace          `json:"namespace,omitempty"`
+	Events      string                        `json:"events,omitempty"`
+}
+
+func (m *RootRouter) AddCluster(cluster ClusterContext) error {
 	if m.Clusters.Has(cluster.Name) {
 		log.Print("cluster already exists")
 		return errors.New("cluster already exists")
