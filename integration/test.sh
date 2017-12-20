@@ -18,13 +18,5 @@ docker run -d --name ${PROJECT} \
 --net ${CORE_NETWORK} \
 www.dockerhub.us/${PROJECT}:${DOCKER_IMAGE_TAG}
 
-echo "Waiting for ${PROJECT} to come online"
-while ! netstat -tna | grep 'LISTEN\>' | grep -q '.'${HTTP_EXTERNAL}; do
-  sleep 5
-done
-
-echo "Sleeping a bit more"
-sleep 10
-
 curl http://localhost:${HTTP_EXTERNAL}/public/health
 
