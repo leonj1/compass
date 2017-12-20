@@ -1,10 +1,18 @@
 Jobs:
+  - Id: 'GetReleaseTag'
+    Run: 'python get_latest_git_release_tag.py'
+    CaptureOutput: true
+
+  - Id: 'GetImageTag'
+    Run: 'python get_docker_build_version.py'
+    CaptureOutput: true
+
   - Id: 'CompileApp'
     Run: 'env GOOS=linux GOARCH=386 CGO_ENABLED=0 go build -v -o compass compass.go'
 
   - Id: 'DockerBuild'
     Run: 'docker build -t www.dockerhub.us/compass:foo .'
-    DependsOn: [ 'CompileApp', 'RemoveDockerContainer' ]
+    DependsOn: [ 'CompileApp', 'RemoveDockerContainer', 'GetReleaseTag', 'GetImageTag' ]
 
   - Id: 'DockerRun'
     Run: 'docker run -d --name compass -p 3244:80 -e HTTPPORT=80 --net core_net www.dockerhub.us/compass:foo'
