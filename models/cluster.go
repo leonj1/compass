@@ -31,11 +31,34 @@ func (m *RootRouter) AddCluster(cluster ClusterContext) error {
 		log.Print("cluster already exists")
 		return errors.New("cluster already exists")
 	}
-	m.Clusters.Set(cluster.Name, cluster)
+
+	// iterate over Crds, Namespace, Nodes
+	crds := cmap.New()
+	for k, v := range cluster.Crds {
+		crds.Set(k, v)
+	}
+	namespaces := cmap.New()
+	for k, v := range cluster.Namespace {
+		namespaces.Set(k, v)
+	}
+	nodes := cmap.New()
+	for k, v := range cluster.Nodes {
+		nodes.Set(k, v)
+	}
+
+	m.Clusters.Set(cluster.Name, Cluster{
+		Name:        cluster.Name,
+		Status:      cluster.Status,
+		Personality: cluster.Personality,
+		Events:      cluster.Events,
+		Crds:        &crds,
+		Nodes:       &nodes,
+		Namespace:   &namespaces,
+	})
 	return nil
 }
 
-func (m *RootRouter) UpdateCluster(clusterName string, cluster Cluster) error {
+func (m *RootRouter) UpdateCluster(clusterName string, cluster ClusterContext) error {
 	if !m.Clusters.Has(cluster.Name) {
 		return errors.New("cluster does not exist")
 	}
@@ -191,13 +214,13 @@ func (m *RootRouter) SetEvents(clusterName, events string) error {
 	return nil
 }
 
-func (m *RootRouter) GetAClusterByName(clusterName string) (*ClusterContext, error) {
+func (m *RootRouter) GetAClusterByName(clusterName string) (*Cluster, error) {
 	if !m.Clusters.Has(clusterName) {
 		return nil, errors.New("cluster does not exist")
 	}
 
 	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
-		existingCluster := tmpCluster.(ClusterContext)
+		existingCluster := tmpCluster.(Cluster)
 		return &existingCluster, nil
 	}
 	return nil, errors.New("cluster does not exist")

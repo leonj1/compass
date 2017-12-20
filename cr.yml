@@ -1,0 +1,23 @@
+Jobs:
+  - Id: 'CompileApp'
+    Run: 'env GOOS=linux GOARCH=386 CGO_ENABLED=0 go build -v -o compass compass.go'
+
+  - Id: 'DockerBuild'
+    Run: 'docker build -t www.dockerhub.us/compass:foo .'
+    DependsOn: [ 'CompileApp', 'RemoveDockerContainer' ]
+
+  - Id: 'DockerRun'
+    Run: 'docker run -d --name compass -p 3244:80 -e HTTPPORT=80 --net core_net www.dockerhub.us/compass:foo'
+    DependsOn: [ 'DockerBuild', 'RemoveDockerContainer' ]
+
+  - Id: 'StopDockerContainer'
+    Run: 'docker stop compass || true'
+
+  - Id: 'RemoveDockerContainer'
+    Run: 'docker rm compass || true'
+    DependsOn: [ 'StopDockerContainer' ]
+
+  - Id: 'IntegrationTest'
+    Run: 'python ./integration/test.py'
+    DependsOn: [ 'DockerRun' ]
+

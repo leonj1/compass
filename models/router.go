@@ -44,7 +44,7 @@ func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
-	payload := &Cluster{}
+	payload := &ClusterContext{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
 		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling cluster"}
