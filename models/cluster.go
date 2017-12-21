@@ -99,7 +99,6 @@ func (m *RootRouter) AddCustomResource(clusterName string, crd Crd) error {
 		log.Error("unable to fetch cluster from map for some unknown reason")
 		return errors.New("unable to fetch cluster from map for some reason")
 	}
-	log.Info("Done adding crd")
 	return nil
 }
 

@@ -205,13 +205,15 @@ func (m *RootRouter) SetEventsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
 	body, err := ioutil.ReadAll(r.Body)
+	log.Info("Adding events")
 	err = m.SetEvents(clusterName, string(body))
 	if err != nil {
+		log.Errorf("Problem adding events: %s", spew.Sdump(err))
 		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding events: %s", err.Error())}
 		respondWithJSON(w, 404, response)
 		return
 	}
-
+	log.Info("Done adding events")
 	respondWithJSON(w, 201, &QueryResponse{Message: "set"})
 }
 
