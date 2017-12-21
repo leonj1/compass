@@ -65,10 +65,12 @@ func (m *RootRouter) UpdateClusterHandler(w http.ResponseWriter, r *http.Request
 func (m *RootRouter) AddCustomResourceHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	clusterName := vars["name"]
+	log.Info("Adding CRD")
 	body, err := ioutil.ReadAll(r.Body)
 	payload := &Crd{}
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
+		log.Error("Problem unmarshalling crd")
 		response := &ErrorResponse{ErrorMessage: "Problem unmarshalling custom resource"}
 		respondWithJSON(w, 404, response)
 		return
@@ -76,11 +78,13 @@ func (m *RootRouter) AddCustomResourceHandler(w http.ResponseWriter, r *http.Req
 
 	err = m.AddCustomResource(clusterName, *payload)
 	if err != nil {
+		log.Errorf("Problem adding crd: %s", spew.Sdump(err))
 		response := &ErrorResponse{ErrorMessage: fmt.Sprintf("Problem adding custom resource: %s", err.Error())}
 		respondWithJSON(w, 404, response)
 		return
 	}
 
+	log.Info("Done adding crd")
 	respondWithJSON(w, 201, &QueryResponse{Message: "created"})
 }
 

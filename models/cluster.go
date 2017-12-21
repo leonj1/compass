@@ -3,7 +3,7 @@ package models
 import (
 	"github.com/kataras/go-errors"
 	"github.com/orcaman/concurrent-map"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 type Cluster struct {
@@ -80,20 +80,26 @@ func (m *RootRouter) UpdateCluster(clusterName string, cluster ClusterContext) e
 }
 
 func (m *RootRouter) AddCustomResource(clusterName string, crd Crd) error {
+	log.Print("In AddCustomResource")
 	if !m.Clusters.Has(clusterName) {
 		return errors.New("cluster does not exist")
 	}
 
+	log.Print("Fetching cluster from map")
 	if tmpCluster, ok := m.Clusters.Get(clusterName); ok {
 		existingCluster := tmpCluster.(Cluster)
 		if existingCluster.Crds.Has(crd.Name) {
+			log.Error("crd already exists in cluster")
 			return errors.New("crd already exists in cluster")
 		}
+		log.Info("Adding crd")
 		existingCluster.Crds.Set(crd.Name, crd)
 		m.Clusters.Set(clusterName, existingCluster)
 	} else {
+		log.Error("unable to fetch cluster from map for some unknown reason")
 		return errors.New("unable to fetch cluster from map for some reason")
 	}
+	log.Info("Done adding crd")
 	return nil
 }
 
