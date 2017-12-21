@@ -68,7 +68,6 @@ class MyTest(unittest.TestCase):
         self.assertEqual(r.status_code, 201)
         r = requests.get("{}/clusters/dev01".format(host))
         self.assertEqual(r.status_code, 200)
-        # TODO Find a way to ignore create_date
         expected = '{"name":"dev01","status":"live","personality":"dev","crds":{"pyjob":{"name":"pyjob","version":"1.0"},"sparkjob":{"name":"sparkjob","version":"2.0"}},"nodes":{"node1":{"name":"node1","version":"1.8.0"},"node2":{"name":"node2","version":"1.8.0"}},"namespace":{"default":{"name":"default","pod_count":3,"crds":{"pyjob":2,"sparkjob":3}}},"events":"this is one line\\nThis is another"}'
         self.assertEqual(r.content, expected)
         # Add Crd
@@ -82,8 +81,20 @@ class MyTest(unittest.TestCase):
         self.assertEqual(r.content, expected)
         r = requests.get("{}/clusters/dev01".format(host))
         self.assertEqual(r.status_code, 200)
-        # TODO Find a way to ignore create_date
         expected = '{"name":"dev01","status":"live","personality":"dev","crds":{"pyjob":{"name":"pyjob","version":"1.0"},"sparkjob":{"name":"sparkjob","version":"2.0"},"tensorflow":{"name":"tensorflow","version":"1.9.0"}},"nodes":{"node1":{"name":"node1","version":"1.8.0"},"node2":{"name":"node2","version":"1.8.0"}},"namespace":{"default":{"name":"default","pod_count":3,"crds":{"pyjob":2,"sparkjob":3}}},"events":"this is one line\\nThis is another"}'
+        self.assertEqual(r.content, expected)
+        # Add Node
+        payload = {
+           "name": "hostA",
+           "version": "1.9.0"
+        }
+        r = requests.post("{}/clusters/dev01/nodes".format(host), json=payload)
+        self.assertEqual(r.status_code, 201)
+        expected = '{"message":"created"}'
+        self.assertEqual(r.content, expected)
+        r = requests.get("{}/clusters/dev01".format(host))
+        self.assertEqual(r.status_code, 200)
+        expected = '{"name":"dev01","status":"live","personality":"dev","crds":{"pyjob":{"name":"pyjob","version":"1.0"},"sparkjob":{"name":"sparkjob","version":"2.0"},"tensorflow":{"name":"tensorflow","version":"1.9.0"}},"nodes":{"hostA":{"name":"hostA","version":"1.9.0"},"node1":{"name":"node1","version":"1.8.0"},"node2":{"name":"node2","version":"1.8.0"}},"namespace":{"default":{"name":"default","pod_count":3,"crds":{"pyjob":2,"sparkjob":3}}},"events":"this is one line\\nThis is another"}'
         self.assertEqual(r.content, expected)
 
 
