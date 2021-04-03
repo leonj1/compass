@@ -9,7 +9,7 @@ if [[ "$BRANCH" != "master" ]]; then
 fi
 
 if [ $# -eq 0 ]
-  then
+then
     # get highest tag number
     VERSION=`git describe --abbrev=0 --tags`
     # replace . with spaec so can split into an array
@@ -21,7 +21,7 @@ if [ $# -eq 0 ]
     VNUM3=$((VNUM3+1))
     # create new tag
     NEW_TAG="$VNUM1.$VNUM2.$VNUM3"
-    echo "Proposing $VERSION to $NEW_TAG
+    echo "Proposing $VERSION to $NEW_TAG"
 else
   NEW_TAG=$1
 fi
