@@ -25,7 +25,7 @@ func main() {
 	if _, err := os.Stat(sqliteDatabase); err == nil {
 		log.Info().Msgf("Exists: %s", sqliteDatabase)
 	} else if os.IsNotExist(err) {
-		log.Info().Msgf("Does not exist: %s", sqliteDatabase)
+		log.Info().Msgf("DB file does not exist: %s", sqliteDatabase)
 		os.Exit(1)
 	} else {
 		// Schrodinger: file may or may not exist. See err for details.
