@@ -15,9 +15,9 @@ DOCKER_IMAGE=compass
 
 build:
 	go build -v -ldflags="-extldflags=-static" -tags sqlite_omit_load_extension
-	upx --no-color --no-progress --best -q compass
 
 docker: build
+	upx --no-color --no-progress --best -q compass
 	docker build -t ${DOCKER_REPO}/${DOCKER_IMAGE}:$(VERSION) .
 
 push: docker
