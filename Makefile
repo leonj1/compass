@@ -14,7 +14,7 @@ DOCKER_REPO=registry.digitalocean.com/area51
 DOCKER_IMAGE=compass
 
 build:
-	CGO_ENABLED=0 go build -v
+	go build -v
 	upx --no-color --no-progress --best -q compass
 
 docker: build
