@@ -18,6 +18,7 @@ import (
 )
 
 func main() {
+	log.Info().Msgf("Starting compass")
 	sqliteDatabase := os.Getenv("DB_PATH")
 	serverPort := os.Getenv("HTTP_PORT")
 
@@ -33,12 +34,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	log.Info().Msgf("Attempting to connect to db %s", sqliteDatabase)
 	db, err := sql.Open("sqlite3", sqliteDatabase)
 	if err != nil {
-		return
+		log.Error().Msgf("Problem connecting to db %s", err.Error())
+		os.Exit(1)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
+			log.Error().Msgf("Problem closing db connection %s", err.Error())
 			return
 		}
 	}()
