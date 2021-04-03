@@ -14,7 +14,7 @@ DOCKER_REPO=registry.digitalocean.com/area51
 DOCKER_IMAGE=compass
 
 build:
-	go build -v
+	go build -v -ldflags="-extldflags=-static" -tags sqlite_omit_load_extension
 	upx --no-color --no-progress --best -q compass
 
 docker: build

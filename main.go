@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/sqlite3"
-	"github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/Boostport/migration"
+	"github.com/Boostport/migration/driver/sqlite"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/leonj1/compass/routes"
@@ -16,6 +16,10 @@ import (
 	"os"
 	"time"
 )
+
+// Create migration source
+//go:embed migrations
+var embedFS embed.FS
 
 func main() {
 	log.Info().Msgf("Starting compass")
@@ -47,38 +51,25 @@ func main() {
 		}
 	}()
 
-	config := &sqlite3.Config{
-		MigrationsTable: "my_migration_table",
+	embedSource := &migration.EmbedMigrationSource{
+		EmbedFS: embedFS,
+		Dir:     "migrations",
 	}
-	driver, err := sqlite3.WithInstance(db, config)
+
+	driver, err := sqlite.New("file::memory:?cache=shared&_busy_timeout=50000", true)
+
 	if err != nil {
-		log.Printf(err.Error())
+		log.Printf("Problem connecting to db: %s", err.Error())
 		os.Exit(1)
 	}
 
-	fsrc, err := (&file.File{}).Open("file://.//migrations")
+	// Run all up migrations
+	applied, err := migration.Migrate(driver, embedSource, migration.Up, 0)
 	if err != nil {
-		log.Printf("Problem %s", err.Error())
+		log.Printf("Problem applying migrations: %s", err.Error())
 		os.Exit(1)
 	}
-
-	m, err := migrate.NewWithInstance(
-		"file",
-		fsrc,
-		"sqlite3",
-		driver,
-	)
-
-	log.Printf("Performing database migrations\n")
-	err = m.Up()
-	if err != nil {
-		if err.Error() == "no change" {
-			log.Printf("No migrations performed\n")
-		} else {
-			log.Printf("Migrate UP failed: %s", err.Error())
-			os.Exit(1)
-		}
-	}
+	log.Info().Msgf("Applied %d db migrations", applied)
 
 	app := routes.App{
 		Compass: *services.NewCompass(db),
