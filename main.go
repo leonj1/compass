@@ -56,8 +56,7 @@ func main() {
 		Dir:     "migrations",
 	}
 
-	driver, err := sqlite.New(fmt.Sprintf("file::%s:?cache=shared&_busy_timeout=50000", sqliteDatabase), true)
-
+	driver, err := sqlite.New(fmt.Sprintf("file:%s", sqliteDatabase), true)
 	if err != nil {
 		log.Printf("Problem connecting to db: %s", err.Error())
 		os.Exit(1)
