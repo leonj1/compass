@@ -51,7 +51,7 @@ func (a *Application) FindAll(db *sql.DB) ([]Application, error) {
 	if db == nil {
 		return nil, errors.New("db cannot be empty")
 	}
-	sqlCmd := fmt.Sprintf("SELECT id, application_id FROM %s", APPLICATION_TABLE)
+	sqlCmd := fmt.Sprintf("SELECT id, name FROM %s", APPLICATION_TABLE)
 	rows, err := db.Query(sqlCmd)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (a *Application) FindByApplicationName(db *sql.DB, name string) ([]Applicat
 	} else if name == "" {
 		return nil, errors.New("application name cannot be empty")
 	}
-	sqlCmd := fmt.Sprintf("SELECT id, application_id FROM %s WHERE name=?", APPLICATION_TABLE)
+	sqlCmd := fmt.Sprintf("SELECT id, name FROM %s WHERE name=?", APPLICATION_TABLE)
 	rows, err := db.Query(sqlCmd, name)
 	if err != nil {
 		return nil, err
