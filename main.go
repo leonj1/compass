@@ -25,6 +25,7 @@ func main() {
 	log.Info().Msgf("Starting compass")
 	sqliteDatabase := os.Getenv("DB_PATH")
 	serverPort := os.Getenv("HTTP_PORT")
+	version := os.Getenv("VERSION")
 
 	if _, err := os.Stat(sqliteDatabase); err == nil {
 		log.Info().Msgf("Exists: %s", sqliteDatabase)
@@ -72,6 +73,7 @@ func main() {
 
 	app := routes.App{
 		Compass: *services.NewCompass(db),
+		Version: version,
 	}
 
 	s := mux.NewRouter()
